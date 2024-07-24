@@ -7,9 +7,9 @@ A cool Discord bot (written in Rust!) used to help you and your server grind Lee
 ## Features
 
 - [x] Query the daily LeetCode problem description
-- [x] Query problems descriptions by its title slug (e.g. the slug for "Jump Game" is "jump-game")
-- [x] Query problems descriptions by its problem ID (e.g. the problem "Sqrt(x)" has an ID of 69)
-- [ ] Query problems descriptions by its title (ex. "Jump Game")
+- [x] Query problem descriptions by title slugs (e.g. the slug for "Jump Game" is "jump-game")
+- [x] Query problem descriptions by problem IDs (e.g. the problem "Sqrt(x)" has an ID of 69)
+- [ ] Query problem descriptions by title (ex. "Jump Game")
 - [ ] Link LeetCode accounts to members' Discord accounts
 - [ ] Calculate scores for members with linked LeetCode accounts based on the number of questions and the difficulty of the questions they have completed upon request
 - [ ] Generate a leaderboard based on member LeetCode scores upon request
