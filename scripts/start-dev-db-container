@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+required_env_vars=(
+  "DB_PASSWORD"
+  "DB_USER"
+  "DB_NAME"
+  "DEV_DB_PORT"
+)
+missing_env_vars=()
+DB_CONTAINER_NAME="discode-db-dev"
+
+for req in ${required_env_vars[@]}; do
+  if [ -z "${!req}" ]; then
+    missing_env_vars+=("$req")
+  fi
+done
+
+if ! [ -z $missing_env_vars ]; then
+  message="Required environment variable(s) are missing: ${missing_env_vars[0]}"
+  for missing in ${missing_env_vars[@]:1}; do
+    message+=", $missing"
+  done
+  echo $message
+  echo "exiting..."
+  exit
+fi
+
+
+docker start $DB_CONTAINER_NAME
+if [ $? -eq 0 ]; then
+  echo "Successfully started dev database container"
+else
+  echo "Container doesn't exist locally, creating new container..."
+  docker run --rm --name $DB_CONTAINER_NAME \
+    -e POSTGRES_PASSWORD=$DB_PASSWORD \
+    -e POSTGRES_USER=$DB_USER \
+    -e POSTGRES_DB=$DB_NAME \
+    -p $DEV_DB_PORT:5432 \
+    -d postgres
+
+  if [ $? -eq 0 ]; then
+    echo "Successfully created and started dev database container"
+  else
+    echo "Error occurred while creating the dev database container );"
+  fi
+fi

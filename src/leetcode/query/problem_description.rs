@@ -54,10 +54,9 @@ struct QuestionDescription {
     content: String
 }
 
-pub async fn get_problem_description(slug: String) -> Result<ProblemDescription, Error> {
+pub async fn get_problem_description(client: &reqwest::Client, slug: String) -> Result<ProblemDescription, Error> {
     tracing::info!("getting problem description for slug {slug}");
 
-    let client = reqwest::Client::new();
     let res: ProblemInfoResponse = client.post("https://leetcode.com/graphql")
         .json(&json!({
             "query": PROBLEM_INFO_QUERY,

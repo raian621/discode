@@ -50,13 +50,9 @@ pub async fn get_problem_slug_by_id(id: i32) -> Result<String, Error> {
                 "categorySlug": "all-code-essentials",
                 "filters": {},
                 "limit": 1,
-                "skip": id
+                "skip": id-1
             }
-        }))
-        .send()
-        .await?
-        .json()
-        .await?;
+        })).send().await?.json().await?;
 
     Ok(res.data.problemsetQuestionList.questions[0].titleSlug.clone())
 }

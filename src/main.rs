@@ -1,11 +1,13 @@
 mod commands;
 mod leetcode;
+mod db;
 
 use std::env;
 use dotenv::dotenv;
 use serenity::all::{GuildId, Interaction, Ready};
 use serenity::async_trait;
 use serenity::prelude::*;
+use sqlx::postgres::PgPool;
 
 struct Handler;
 
@@ -53,6 +55,9 @@ async fn main() {
     tracing_subscriber::fmt::init();
     // Login with a bot token from the environment
     let token: String = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+
+    let pool: PgPool = db::init().await.unwrap();
+
     // Set gateway intents, which decides what events the bot will be notified about
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::DIRECT_MESSAGES

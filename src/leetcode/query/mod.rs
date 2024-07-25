@@ -2,6 +2,7 @@ mod daily_problem_slug;
 mod problem_slug_by_id;
 mod problem_description;
 mod acceptance_rate;
+pub mod error;
 
 pub use daily_problem_slug::get_daily_problem_slug;
 pub use problem_slug_by_id::get_problem_slug_by_id;

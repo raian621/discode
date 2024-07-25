@@ -38,7 +38,7 @@ struct QuestionStats {
     acRate: String,
 }
 
-pub async fn get_acceptance_rate(client: Client, slug: &String) -> Result<String, Error> {
+pub async fn get_acceptance_rate(client: &Client, slug: &String) -> Result<String, Error> {
     let res: AcceptanceRateWrapper = client.post("https://leetcode.com/graphql")
         .json(&json!({
             "query": ACCEPTANCE_RATE_QUERY,

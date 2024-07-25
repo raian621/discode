@@ -27,6 +27,7 @@ pub async fn exec(ctx: Context, command: CommandInteraction) -> Result<(), Error
 pub async fn run(options: &[ResolvedOption<'_>]) -> Result<ProblemDescription, Error> {
     let mut problem_id: String = "1".to_string();
     let mut use_id_num = false;
+
     for opt in options {
         match opt.name {
             "identifier" => {
@@ -34,18 +35,29 @@ pub async fn run(options: &[ResolvedOption<'_>]) -> Result<ProblemDescription, E
                     problem_id = problem_id_str.to_string();
                 }
             }
-            "id" => {
-                use_id_num = true;
+            "type" => {
+                if let ResolvedValue::String(choice) = opt.value {
+                    match choice {
+                        "id" => use_id_num = true,
+                        "slug" => (),
+                        _ => ()
+                    }
+                }
             },
             _ => ()
         }
     }
 
     if use_id_num {
-        problem_id = get_problem_slug_by_id(problem_id.parse::<i32>().unwrap()-1).await?;
+        let id_num = match problem_id.parse::<i32>() {
+            Ok(num) => num,
+            Err(_) => 0,
+        };
+        problem_id = get_problem_slug_by_id(id_num).await?;
     }
 
-    let question_info = get_problem_description(problem_id).await?;
+    let client = reqwest::Client::new();
+    let question_info = get_problem_description(&client, problem_id).await?;
     
     Ok(question_info)
 }
@@ -61,8 +73,11 @@ pub fn register() -> CreateCommand {
             ).required(true))
         .add_option(
             CreateCommandOption::new(
-                CommandOptionType::Boolean, 
-                "id", 
-                "Use the problem id to find the problem"
-        ))
+                CommandOptionType::String, 
+                "type", 
+                "What to use to find the problem (problem id, title slug, etc.)"
+            )
+            .add_string_choice("id", "id")
+            .add_string_choice("slug", "slug")
+        )
 }

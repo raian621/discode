@@ -26,8 +26,7 @@ struct ProblemLink {
     link: String
 }
 
-pub async fn get_daily_problem_slug() -> Result<String, Error> {
-    let client = reqwest::Client::new();
+pub async fn get_daily_problem_slug(client: &reqwest::Client) -> Result<String, Error> {
     let res: DailyProblemResponse = client.post("https://leetcode.com/graphql")
         .json(&json!({"query": DAILY_PROBLEM_SLUG_QUERY}))
         .send()

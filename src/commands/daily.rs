@@ -25,8 +25,9 @@ pub async fn exec(ctx: Context, command: CommandInteraction) -> Result<(), Error
 }
 
 pub async fn run() -> Result<ProblemDescription, Error> {
-    let problem_slug = get_daily_problem_slug().await?;
-    let question_info = get_problem_description(problem_slug).await?;
+    let client = reqwest::Client::new();
+    let problem_slug = get_daily_problem_slug(&client).await?;
+    let question_info = get_problem_description(&client, problem_slug).await?;
 
     Ok(question_info)
 }
