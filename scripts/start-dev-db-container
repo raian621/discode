@@ -44,3 +44,5 @@ else
     echo "Error occurred while creating the dev database container );"
   fi
 fi
+
+sqlx migrate run

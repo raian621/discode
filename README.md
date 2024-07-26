@@ -10,24 +10,57 @@ A cool Discord bot (written in Rust!) used to help you and your server grind Lee
 - [x] Query problem descriptions by title slugs (e.g. the slug for "Jump Game" is "jump-game")
 - [x] Query problem descriptions by problem IDs (e.g. the problem "Sqrt(x)" has an ID of 69)
 - [ ] Query problem descriptions by title (ex. "Jump Game")
-- [ ] Link LeetCode accounts to members' Discord accounts
+- [x] Link LeetCode accounts to members' Discord accounts
 - [ ] Calculate scores for members with linked LeetCode accounts based on the number of questions and the difficulty of the questions they have completed upon request
 - [ ] Generate a leaderboard based on member LeetCode scores upon request
 - [ ] Scheduled announcements (Leaderboard results, daily LeetCode notifications, etc)
 - [ ] Managed role used to pinging members when the daily LeetCode problem is updated
 
-## Running
+## Running the Bot
 
 ### Prerequisites
 
-In order to run this bot, you must first create a Discord App on the Discord Developer Portal and procure a Discord API token:
+- A Discord application set up with a Discord token in the Discord Developer 
+Portal (see https://discord.com/developers/docs/quick-start/getting-started)
+- A PostgreSQL database
+    - We use Docker containers to run databases in development: (Docker install instructions for Ubuntu: https://docs.docker.com/engine/install/ubuntu/)
+- Rust tools such as cargo, rustup, etc. (download instructions: https://www.rust-lang.org/tools/install)
 
-> [!IMPORTANT] 
-> Guide: https://discord.com/developers/docs/quick-start/getting-started
+### Required Packages
 
----
+(non-exhaustive list, there may be more packages necessary to run the bot)
 
-To run the bot, run the following command:
+**Ubuntu**:
+```sh
+sudo apt-get install -y postgresql-client libssl-dev
+```
+
+### Database
+
+DisCode uses a PostgreSQL relational database. In development or while testing,
+you can use the included convenience scripts in located at 
+`scripts/start-dev-db-container` and `scripts/start-test-db-container` to launch
+Docker containers for the development database and testing database
+respectively. In production, you can use whatever PostgeSQL server configuration
+you want I guess.
+
+Once DisCode's database is spun up for the first time and you have set the 
+(relevant environment variables for connecting to the database)[#environment-variables], 
+you can apply DisCode's database migrations by running
+
+```sh
+sqlx migrate run
+```
+
+> [!TIP]
+> You can install the `sqlx` cli tool by running
+> ```sh
+> cargo install sqlx-cli
+> ```
+
+To run the bot, make sure to set the relevant 
+(environment variables)[#environment-variables] and then run the following
+command:
 
 ```sh
 cargo run
@@ -35,8 +68,15 @@ cargo run
 
 ### Environment Variables
 
-Name            | Optional | Purpose
-----------------|----------|--------------
-`DISCORD_TOKEN` | no       | Used by the bot to authenticate to the Discord API
-`GUILD_ID`      | yes      | ID of the server you are using to test the bot
-
+Name            | Required  | Purpose
+----------------|-----------|--------------
+`DISCORD_TOKEN` | yes       | Used by the bot to authenticate to the Discord API
+`GUILD_ID`      | no        | ID of the server you are using to test the bot
+`DB_PASSWORD`   | yes       | Password for the bot's PostgreSQL account
+`DB_USER`       | yes       | Username for the bot's PostgreSQL account
+`DB_NAME`       | yes       | Name of the bot's PosgreSQL database
+`DB_HOST`       | yes       | Hostname of the bot's PostgreSQL database server
+`DB_PORT`       | no        | Port of the database server used in production (defaults to `5432`)
+`DEV_DB_PORT`   | for dev   | Port of the database server used in development
+`TEST_DB_PORT`  | for tests | Port of the database server used in development
+`DATABASE_URL`  | for sqlx  | URL to the PostgreSQL database server used by the bot

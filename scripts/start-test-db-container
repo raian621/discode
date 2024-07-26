@@ -43,3 +43,5 @@ else
     echo "Error occurred while creating the test database container );"
   fi
 fi
+
+sqlx migrate run

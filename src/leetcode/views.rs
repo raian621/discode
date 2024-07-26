@@ -2,7 +2,7 @@ use serenity::all::{Color, CreateEmbed, CreateInteractionResponse, CreateInterac
 
 use super::models::ProblemDescription;
 
-pub fn problem_view(title: Option<&str>, question_info: Option<ProblemDescription>) -> CreateInteractionResponse{
+pub fn problem_view(title: Option<&str>, question_info: Option<ProblemDescription>) -> CreateInteractionResponse {
     let data = match question_info {
         Some(info) => {
             let mut problem_embed = CreateEmbed::new()

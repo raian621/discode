@@ -49,10 +49,7 @@ pub async fn run(options: &[ResolvedOption<'_>]) -> Result<ProblemDescription, E
     }
 
     if use_id_num {
-        let id_num = match problem_id.parse::<i32>() {
-            Ok(num) => num,
-            Err(_) => 0,
-        };
+        let id_num = problem_id.parse::<i32>().unwrap_or(0);
         problem_id = get_problem_slug_by_id(id_num).await?;
     }
 

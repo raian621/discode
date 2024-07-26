@@ -9,7 +9,9 @@ use serenity::async_trait;
 use serenity::prelude::*;
 use sqlx::postgres::PgPool;
 
-struct Handler;
+struct Handler {
+    pool: PgPool
+}
 
 #[async_trait]
 impl EventHandler for Handler {
@@ -19,6 +21,7 @@ impl EventHandler for Handler {
                 "ping" => { commands::ping::run(&command.data.options()); },
                 "daily" => commands::daily::exec(ctx, command).await.unwrap(),
                 "problem" => commands::problem::exec(ctx, command).await.unwrap(),
+                "connect" => commands::connect::exec(ctx, command, &self.pool).await.unwrap(),
                 _ => { println!("not implemented :("); },
             };
 
@@ -42,7 +45,8 @@ impl EventHandler for Handler {
         guild_id.set_commands(&ctx.http, vec![
             commands::ping::register(),
             commands::daily::register(),
-            commands::problem::register()
+            commands::problem::register(),
+            commands::connect::register()
         ]).await.unwrap();
     }
 }
@@ -65,7 +69,12 @@ async fn main() {
     
     // Create a new instance of the Client, logging in as a bot.
     let mut client =
-        Client::builder(&token, intents).event_handler(Handler).await.expect("Err creating client");
+        Client::builder(&token, intents)
+            .event_handler(Handler{
+                pool
+            })
+            .await
+            .expect("Err creating client");
 
     // Start listening for events by starting a single shard
     if let Err(why) = client.start().await {

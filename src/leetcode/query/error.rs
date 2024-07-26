@@ -1,6 +1,7 @@
 use std::fmt::{self, Display, Formatter};
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum QueryError {
     Sqlx(sqlx::Error),
     Reqwest(reqwest::Error),

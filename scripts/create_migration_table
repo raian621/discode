@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-if [ -z $DB_PORT ]; then
-    export DB_PORT=$DEV_DB_PORT
-fi
-
-export PGPASSWORD=$DB_PASSWORD
-psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -a -f migrations/0000-create-migrations-table.sql
-export -n PGPASSWORD

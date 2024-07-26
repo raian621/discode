@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO leetcode_connections (leetcode_username, discord_id) VALUES ($1, $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "46f59ec1c977fde17c527f4c159cbdc5c13b72346cb0f9d538d9d34d88b2359f"
+}

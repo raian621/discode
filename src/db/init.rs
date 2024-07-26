@@ -2,8 +2,6 @@ use std::env;
 
 use sqlx::postgres::PgPool;
 
-use super::apply_migrations;
-
 struct DbConfig {
     host: String,
     port: i32,
@@ -28,9 +26,6 @@ pub async fn init() -> Result<PgPool, sqlx::Error> {
     tracing::info!("Connecting to PostgreSQL database...");
     let pool = PgPool::connect(db_url.as_str()).await?;
     tracing::info!("Connection successful!");
-    if let Err(why) = apply_migrations(&pool).await {
-        tracing::error!("{:?}", why);
-    }
 
     Ok(pool)
 }
