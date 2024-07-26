@@ -6,7 +6,7 @@ use crate::{db::models::{get_connection_token_by_id, LeetCodeConnection}, leetco
 
 enum Status {
     Connected,
-    Authenticate(String),
+    Validate(String),
 }
 
 pub async fn exec(ctx: Context, command: CommandInteraction, pool: &PgPool) -> Result<(), String> {
@@ -16,9 +16,10 @@ pub async fn exec(ctx: Context, command: CommandInteraction, pool: &PgPool) -> R
         _ => return Err("`username` argument not provided".to_string())
     };
 
-    let builder = match run(command.user.id.into(), &leetcode_username, pool).await {
+    let result = run(pool, command.user.id.into(), &leetcode_username).await;
+    let builder = match result {
         Ok(Status::Connected) => connected_view(leetcode_username),
-        Ok(Status::Authenticate(token)) => authenticate_view(token),
+        Ok(Status::Validate(token)) => validate_view(token),
         Err(why) => {
             tracing::error!("{}", why);
             error_view()
@@ -32,20 +33,17 @@ pub async fn exec(ctx: Context, command: CommandInteraction, pool: &PgPool) -> R
     Ok(())
 }
 
-async fn run(discord_id: i64, leetcode_username: &String, pool: &PgPool) -> Result<Status, Error> {
+async fn run(
+    pool: &PgPool,
+    discord_id: i64,
+    leetcode_username: &String,
+) -> Result<Status, Error> {
     let connection_token = get_connection_token_by_id(pool, discord_id).await;
     let token: String = format!("discode-{}", connection_token.token);
     let client = reqwest::Client::new();
     let skills = get_user_skills(&client, leetcode_username).await.unwrap();
 
-    let mut authenticated = false;
-
-    for skill in skills {
-        if skill == token {
-            authenticated = true;
-            break;
-        }
-    }
+    let authenticated = validation_token_present(&skills, &token);
 
     match authenticated {
         true => {
@@ -56,7 +54,7 @@ async fn run(discord_id: i64, leetcode_username: &String, pool: &PgPool) -> Resu
             }.insert(pool).await.unwrap();
             Ok(Status::Connected)
         },
-        false => Ok(Status::Authenticate(token))
+        false => Ok(Status::Validate(token))
     }
 }
 
@@ -76,20 +74,10 @@ fn connected_view(leetcode_username: String) -> CreateInteractionResponse {
     )
 }
 
-fn authenticate_view(token: String) -> CreateInteractionResponse {
+fn validate_view(token: String) -> CreateInteractionResponse {
     let embed = CreateEmbed::new()
         .title("Verify Account")
-        .description(format!(r#"Add the following token to the skills section on
-your LeetCode profile and then re-run the `/connect` command:
-
-```
-{}
-```
-
-After your account is verified, feel free to delete the skill entry used for
-verification in your LeetCode profile's skills section."#,
-            token
-        ))
+        .description(verify_account_markdown(token))
         .color(Color::new(0xffa116));
 
     CreateInteractionResponse::Message(
@@ -123,4 +111,82 @@ pub fn register() -> CreateCommand {
             )
             .required(true)
         )
+}
+
+fn validation_token_present<T: Into<String> + Clone>(skills: &Vec<T>, token: &T) -> bool {
+    let token: String = token.clone().into();
+    for skill in skills.into_iter() {
+        if skill.clone().into() == token {
+            return true;
+        }
+    }
+
+    false
+}
+
+fn verify_account_markdown(token: impl Into<String>) -> String {
+    format!(
+r#"Add the following token to the skills section on
+your LeetCode profile and then re-run the `/connect` command:
+
+```
+{}
+```
+
+After your account is verified, feel free to delete the skill entry used for
+verification in your LeetCode profile's skills section."#,
+        token.into()
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::commands::connect::{validation_token_present, verify_account_markdown};
+
+    #[test]
+    fn test_validation_token_present() {
+        struct TestCase<'a> {
+            pub skills: Vec<&'a str>,
+            pub token: &'a str,
+            pub want: bool
+        }
+
+        let test_cases = [
+            TestCase {
+                skills: vec!["C++", "Java", "Python", "discode-abcd9999"],
+                token: "discode-abcd9999",
+                want: true
+            },
+            TestCase {
+                skills: vec!["C++", "Java", "Python", "discode-wxyz0000"],
+                token: "discode-abcd9999",
+                want: false
+            },
+            TestCase {
+                skills: vec!["C++", "Java", "Python"],
+                token: "discode-abcd9999",
+                want: false
+            },
+        ];
+
+        for tc in test_cases {
+            assert_eq!(tc.want, validation_token_present(&tc.skills, &tc.token))
+        }
+    }
+
+    #[test]
+    fn test_verify_account_markdown() {
+        assert_eq!(
+            verify_account_markdown("discode-abcd9921"),
+            r#"Add the following token to the skills section on
+your LeetCode profile and then re-run the `/connect` command:
+
+```
+discode-abcd9921
+```
+
+After your account is verified, feel free to delete the skill entry used for
+verification in your LeetCode profile's skills section."#,
+        );
+    }
 }

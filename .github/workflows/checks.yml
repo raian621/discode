@@ -1,0 +1,39 @@
+on: 
+  push:
+    branches: [main]
+    paths: ['**/*.rs', '**/*.yml']
+  pull_request:
+    branches: [main]
+    paths: ['**/*.rs', '**/*.yml']
+
+name: ci
+
+jobs:
+  check:
+    name: Rust project
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v2
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Install cargo-llvm-cov
+        run: cargo install cargo-llvm-cov
+
+      - name: Run tests with code coverage
+        run: cargo llvm-cov test
+
+      - name: Save coverage report
+        run: cargo llvm-cov report --lcov --output-path ./lcov.info
+
+      - name: Upload to codecov.io
+        uses: codecov/codecov-action@v1.0.2
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: ./lcov.info 
+          flags: unit_tests

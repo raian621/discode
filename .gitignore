@@ -1,3 +1,6 @@
 /target
 .env
+
+# test coverage files
 lcov.info
+cobertura.xml

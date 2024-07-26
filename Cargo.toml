@@ -16,3 +16,7 @@ sqlx = { version ="0.8.0", features = [ "runtime-tokio", "tls-native-tls", "post
 tokio = { version = "1.38.1", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1.40"
 tracing-subscriber = "0.3.18"
+
+[dev-dependencies]
+cargo-llvm-cov = "0.6.11"
+sqlx-cli = "0.8.0"

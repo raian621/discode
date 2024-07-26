@@ -3,6 +3,27 @@ use crate::leetcode::{models::ProblemDescription, query::{get_problem_descriptio
 use reqwest::Error;
 use serenity::all::{CommandInteraction, CommandOptionType, Context, CreateCommand, CreateCommandOption, ResolvedOption, ResolvedValue};
 
+#[derive(PartialEq, Debug)]
+enum IdType {
+    Unknown,
+    IdNumber,
+    Slug
+}
+
+impl IdType {
+    fn new(value: ResolvedValue) -> Self {
+        if let ResolvedValue::String(value) = value {
+            match value {
+                "id" => Self::IdNumber,
+                "slug" => Self::Slug,
+                _ => Self::Unknown
+            }
+        } else {
+            Self::Unknown
+        }
+    }
+}
+
 pub async fn exec(ctx: Context, command: CommandInteraction) -> Result<(), Error> {
     tracing::info!("`problem` command executed by `{} ({})`", command.user.name, command.user.id);
     
@@ -26,7 +47,7 @@ pub async fn exec(ctx: Context, command: CommandInteraction) -> Result<(), Error
 
 pub async fn run(options: &[ResolvedOption<'_>]) -> Result<ProblemDescription, Error> {
     let mut problem_id: String = "1".to_string();
-    let mut use_id_num = false;
+    let mut id_type = IdType::Unknown;
 
     for opt in options {
         match opt.name {
@@ -34,27 +55,23 @@ pub async fn run(options: &[ResolvedOption<'_>]) -> Result<ProblemDescription, E
                 if let ResolvedValue::String(problem_id_str) = opt.value {
                     problem_id = problem_id_str.to_string();
                 }
-            }
+            },
             "type" => {
-                if let ResolvedValue::String(choice) = opt.value {
-                    match choice {
-                        "id" => use_id_num = true,
-                        "slug" => (),
-                        _ => ()
-                    }
-                }
+                id_type = IdType::new(opt.value.clone())
             },
             _ => ()
         }
     }
 
-    if use_id_num {
-        let id_num = problem_id.parse::<i32>().unwrap_or(0);
-        problem_id = get_problem_slug_by_id(id_num).await?;
-    }
-
     let client = reqwest::Client::new();
-    let question_info = get_problem_description(&client, problem_id).await?;
+    let question_info = match id_type {
+        IdType::IdNumber => {
+            let id_num = problem_id.parse::<i32>().unwrap_or(0);
+            problem_id = get_problem_slug_by_id(id_num).await?;
+            get_problem_description(&client, problem_id).await?
+        },
+        IdType::Slug|IdType::Unknown => get_problem_description(&client, problem_id).await?,
+    };
     
     Ok(question_info)
 }
@@ -77,4 +94,40 @@ pub fn register() -> CreateCommand {
             .add_string_choice("id", "id")
             .add_string_choice("slug", "slug")
         )
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_id_type_new() {
+        struct TestCase<'a> {
+            value: ResolvedValue<'a>,
+            want: IdType
+        }
+
+        let test_cases = [
+            TestCase {
+                value: ResolvedValue::String("id"),
+                want: IdType::IdNumber
+            },
+            TestCase {
+                value: ResolvedValue::String("slug"),
+                want: IdType::Slug
+            },
+            TestCase {
+                value: ResolvedValue::String(""),
+                want: IdType::Unknown
+            },
+            TestCase {
+                value: ResolvedValue::String("unknown-lol"),
+                want: IdType::Unknown
+            }
+        ];
+
+        for tc in test_cases {
+            assert_eq!(IdType::new(tc.value.clone()), tc.want);
+        }
+    }
 }

@@ -18,7 +18,6 @@ impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::Command(command) = interaction {
             match command.data.name.as_str() {
-                "ping" => { commands::ping::run(&command.data.options()); },
                 "daily" => commands::daily::exec(ctx, command).await.unwrap(),
                 "problem" => commands::problem::exec(ctx, command).await.unwrap(),
                 "connect" => commands::connect::exec(ctx, command, &self.pool).await.unwrap(),
@@ -43,7 +42,6 @@ impl EventHandler for Handler {
         );
 
         guild_id.set_commands(&ctx.http, vec![
-            commands::ping::register(),
             commands::daily::register(),
             commands::problem::register(),
             commands::connect::register()
