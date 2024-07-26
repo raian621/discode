@@ -45,7 +45,7 @@ respectively. In production, you can use whatever PostgeSQL server configuration
 you want I guess.
 
 Once DisCode's database is spun up for the first time and you have set the 
-(relevant environment variables for connecting to the database)[#environment-variables], 
+relevant [environment variables](#environment-variables) for connecting to the database,
 you can apply DisCode's database migrations by running
 
 ```sh
@@ -59,7 +59,7 @@ sqlx migrate run
 > ```
 
 To run the bot, make sure to set the relevant 
-(environment variables)[#environment-variables] and then run the following
+[environment variables](#environment-variables) and then run the following
 command:
 
 ```sh
