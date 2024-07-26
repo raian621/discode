@@ -16,6 +16,33 @@ A cool Discord bot (written in Rust!) used to help you and your server grind Lee
 - [ ] Scheduled announcements (Leaderboard results, daily LeetCode notifications, etc)
 - [ ] Managed role used to pinging members when the daily LeetCode problem is updated
 
+## Commands
+
+### `/connect <leetcode-username>`
+
+Connect your LeetCode account with your Discord account. Simply
+
+- Run the command
+- Get your DisCode validation token
+- Add the DisCode validation token to the skills section of your LeetCode profile
+- Re-run the command to verify that the validation token is in the skills section of your LeetCode profile
+- Optionally remove the validation token from the skills section of your LeetCode profile
+
+The account connection will be used to tabulate your score on DisCode and server leaderboards and allow you to flex your LeetCode stats.
+
+### `/daily`
+
+Display the description and stats for the daily LeetCode problem.
+
+### `/problem <problem-identifier> [type]`
+
+Search for a problem by its
+
+- title slug i.e. `jump-game` (`type: slug`)
+- id number i.e. `55` (`type: id`)
+
+and display the description and stats for the problem if it exists.
+
 ## Running the Bot
 
 ### Prerequisites
