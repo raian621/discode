@@ -1,4 +1,6 @@
-# LeetCode Bot
+# DisCode
+
+[![codecov](https://codecov.io/github/raian621/discode/graph/badge.svg?token=DUYDAFXFAY)](https://codecov.io/github/raian621/discode)
 
 ## Purpose
 
