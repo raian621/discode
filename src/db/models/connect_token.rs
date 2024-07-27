@@ -10,7 +10,7 @@ impl ConnectionToken {
     pub fn new(discord_id: i64) -> Self {
         Self {
             discord_id,
-            token: generate_random_token()
+            token: generate_random_token(8)
         }
     }
 
@@ -51,9 +51,29 @@ pub async fn get_connection_token_by_id(pool: &PgPool, discord_id: i64) -> Conne
     }
 }
 
-fn generate_random_token() -> String {
+fn generate_random_token(length: usize) -> String {
     thread_rng()
         .sample_iter(&Alphanumeric)
-        .take(8)
+        .take(length)
         .map(char::from).collect()
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_generate_random_token() {
+        let random_token = generate_random_token(8);
+        assert_eq!(random_token.len(), 8);
+    }
+
+    #[test]
+    fn test_new_connect_token() {
+        let discord_id = 12344567;
+        let connect_token = ConnectionToken::new(discord_id);
+
+        assert_eq!(connect_token.discord_id, discord_id);
+        assert_eq!(connect_token.token.len(), 8);
+    }
 }

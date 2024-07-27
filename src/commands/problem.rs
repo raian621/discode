@@ -26,7 +26,7 @@ impl IdType {
 
 pub async fn exec(ctx: Context, command: CommandInteraction) -> Result<(), Error> {
     tracing::info!("`problem` command executed by `{} ({})`", command.user.name, command.user.id);
-    
+
     let question_info = run(&command.data.options()).await;
     let builder = match question_info {
         Ok(question_info) => {
@@ -46,23 +46,10 @@ pub async fn exec(ctx: Context, command: CommandInteraction) -> Result<(), Error
 }
 
 pub async fn run(options: &[ResolvedOption<'_>]) -> Result<ProblemDescription, Error> {
-    let mut problem_id: String = "1".to_string();
-    let mut id_type = IdType::Unknown;
-
-    for opt in options {
-        match opt.name {
-            "identifier" => {
-                if let ResolvedValue::String(problem_id_str) = opt.value {
-                    problem_id = problem_id_str.to_string();
-                }
-            },
-            "type" => {
-                id_type = IdType::new(opt.value.clone())
-            },
-            _ => ()
-        }
-    }
-
+    let (mut problem_id, id_type) = extract_options(
+        options.iter().map(|opt| (opt.name, opt.value.clone())).collect()
+    );
+    
     let client = reqwest::Client::new();
     let question_info = match id_type {
         IdType::IdNumber => {
@@ -95,6 +82,28 @@ pub fn register() -> CreateCommand {
             .add_string_choice("slug", "slug")
         )
 }
+ 
+fn extract_options(options: Vec<(&str, ResolvedValue)>) -> (String, IdType) {
+    let mut problem_id: String = "1".to_string();
+    let mut id_type = IdType::Unknown;
+
+    for (name, value) in options {
+        match name {
+            "identifier" => {
+                // identifier is a required option, so this block will always execute
+                if let ResolvedValue::String(problem_id_str) = value {
+                    problem_id = problem_id_str.to_string();
+                }
+            },
+            "type" => {
+                id_type = IdType::new(value.clone())
+            },
+            _ => ()
+        }
+    }
+
+    (problem_id, id_type)
+}
 
 #[cfg(test)]
 mod test {
@@ -123,11 +132,57 @@ mod test {
             TestCase {
                 value: ResolvedValue::String("unknown-lol"),
                 want: IdType::Unknown
+            },
+            TestCase {
+                value: ResolvedValue::Number(12.0),
+                want: IdType::Unknown
             }
         ];
 
         for tc in test_cases {
             assert_eq!(IdType::new(tc.value.clone()), tc.want);
+        }
+    }
+
+    #[test]
+    fn test_extract_options() {
+        #[non_exhaustive]
+        struct TestCase<'a> {
+            options: Vec<(&'a str, ResolvedValue<'a>)>,
+            want_problem_id: String,
+            want_id_type: IdType
+        }
+        
+        let test_cases = [
+            TestCase {
+                options: vec![
+                    ("identifier", ResolvedValue::String("jump-game"))
+                ],
+                want_problem_id:  "jump-game".to_string(),
+                want_id_type: IdType::Unknown,
+            },
+            TestCase {
+                options: vec![
+                    ("identifier", ResolvedValue::String("jump-game")),
+                    ("type", ResolvedValue::String("slug"))
+                ],
+                want_problem_id:  "jump-game".to_string(),
+                want_id_type: IdType::Slug,
+            },
+            TestCase {
+                options: vec![
+                    ("identifier", ResolvedValue::String("55")),
+                    ("type", ResolvedValue::String("id"))
+                ],
+                want_problem_id:  "55".to_string(),
+                want_id_type: IdType::IdNumber,
+            }
+        ];
+
+        for tc in test_cases {
+            let (problem_id, id_type) = extract_options(tc.options);
+            assert_eq!(problem_id, tc.want_problem_id);
+            assert_eq!(id_type, tc.want_id_type);
         }
     }
 }
