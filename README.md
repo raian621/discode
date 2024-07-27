@@ -1,4 +1,5 @@
 [![codecov](https://codecov.io/github/raian621/discode/graph/badge.svg?token=DUYDAFXFAY)](https://codecov.io/github/raian621/discode)
+[![Rust Report Card](https://rust-reportcard.xuri.me/badge/github.com/raian621/discode)](https://rust-reportcard.xuri.me/report/github.com/raian621/discode)
 
 # DisCode
 
