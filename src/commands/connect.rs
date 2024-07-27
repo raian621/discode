@@ -113,9 +113,9 @@ pub fn register() -> CreateCommand {
         )
 }
 
-fn validation_token_present<T: Into<String> + Clone>(skills: &Vec<T>, token: &T) -> bool {
+fn validation_token_present<T: Into<String> + Clone>(skills: &[T], token: &T) -> bool {
     let token: String = token.clone().into();
-    for skill in skills.into_iter() {
+    for skill in skills.iter() {
         if skill.clone().into() == token {
             return true;
         }

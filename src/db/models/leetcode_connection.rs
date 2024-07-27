@@ -16,7 +16,7 @@ impl LeetCodeConnection {
         Ok(())
     }
 
-    pub async fn _find_with_discord_id(pool: &PgPool, discord_id: i64) -> Result<Self, sqlx::Error> {
+    pub async fn find_with_discord_id(pool: &PgPool, discord_id: i64) -> Result<Self, sqlx::Error> {
         let leetcode_username = sqlx::query_scalar(
             r#"SELECT leetcode_username FROM leetcode_connections WHERE discord_id=$1"#,
         )

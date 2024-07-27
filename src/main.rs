@@ -21,6 +21,7 @@ impl EventHandler for Handler {
                 "daily" => commands::daily::exec(ctx, command).await.unwrap(),
                 "problem" => commands::problem::exec(ctx, command).await.unwrap(),
                 "connect" => commands::connect::exec(ctx, command, &self.pool).await.unwrap(),
+                "score" => commands::score::exec(ctx, command, &self.pool).await.unwrap(),
                 _ => { println!("not implemented :("); },
             };
 
@@ -44,7 +45,8 @@ impl EventHandler for Handler {
         guild_id.set_commands(&ctx.http, vec![
             commands::daily::register(),
             commands::problem::register(),
-            commands::connect::register()
+            commands::connect::register(),
+            commands::score::register()
         ]).await.unwrap();
     }
 }

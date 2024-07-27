@@ -46,6 +46,12 @@ Search for a problem by its
 
 and display the description and stats for the problem if it exists.
 
+### `/score`
+
+Returns a score based on the amount and difficulty of problems a member has 
+solved as well as the quantity of each difficulty of problems a member has
+solved if they have linked their LeetCode account using the [`/connect`](#connect) command 
+
 ## Running the Bot
 
 ### Prerequisites

@@ -3,6 +3,7 @@ mod problem_slug_by_id;
 mod problem_description;
 mod acceptance_rate;
 mod user_skills;
+pub mod completed_questions_count;
 pub mod error;
 
 pub use daily_problem_slug::get_daily_problem_slug;
