@@ -14,7 +14,7 @@ A cool Discord bot (written in Rust!) used to help you and your server grind Lee
 - [x] Query problem descriptions by problem IDs (e.g. the problem "Sqrt(x)" has an ID of 69)
 - [ ] Query problem descriptions by title (ex. "Jump Game")
 - [x] Link LeetCode accounts to members' Discord accounts
-- [ ] Calculate scores for members with linked LeetCode accounts based on the number of questions and the difficulty of the questions they have completed upon request
+- [x] Calculate scores for members with linked LeetCode accounts based on the number of questions and the difficulty of the questions they have completed upon request
 - [ ] Generate a leaderboard based on member LeetCode scores upon request
 - [ ] Scheduled announcements (Leaderboard results, daily LeetCode notifications, etc)
 - [ ] Managed role used to pinging members when the daily LeetCode problem is updated
